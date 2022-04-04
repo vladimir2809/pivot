@@ -73,8 +73,9 @@ function create()
     canvas = document.getElementById("canvas");
     context = canvas.getContext("2d");
     initKeyboardAndMouse(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown' ]);
-    setOffsetMousePosXY((window.innerWidth - canvas.width)/2,
-                            (window.innerHeight - canvas.height)/2);
+    //setOffsetMousePosXY((window.innerWidth - canvas.width)/2,
+    //                        (window.innerHeight - canvas.height)/2);
+//    setOffsetMousePosXY(canvas.x,canvas.y);
     updateLineHuman();
 }
 function setOffsetMousePosXY(x,y)// устонавить смешения координаат для прицелевания так как экран начинается не в 0 0

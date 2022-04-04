@@ -35,9 +35,9 @@ function initKeyboardAndMouse(keyArr)// инициализировать пер�
               keyUpArr[index].timeOld=new Date().getTime();
           }
     });
-    window.addEventListener('mousemove', function () {
-        mouseX=event.clientX;
-        mouseY=event.clientY;
+    window.addEventListener('mousemove', function (e) {
+        mouseX=e.pageX - e.target.offsetLeft;//event.clientX;
+        mouseY=e.pageY - e.target.offsetTop;//event.clientY;
        // console.log("mX:"+mouseX+" mY:"+mouseY)
     });
     window.addEventListener('mousedown', function () {
