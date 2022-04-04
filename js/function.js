@@ -108,6 +108,15 @@ function angleIm(x1,y1, x2,y2){
   if (res <= -180) res += 360;
   return res;
 }
+function filtrAngle(angle)// 
+{
+   // if (angle  180) angle -= 360;
+ //   if (angle <= -180) angle += 360;
+    angle %= 360;
+   // if (angle => 180) angle -= 360;
+   // if (angle <= -180) angle += 360;
+    return angle;
+}
 function degressToRadian(deg)// перевод градусов в радианы
 {
     return pi*deg / 180;
