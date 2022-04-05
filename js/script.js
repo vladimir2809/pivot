@@ -54,13 +54,22 @@ dataLine={
 var arrHumanLine=[
 ];
 var Frame={
-    x:100,
-    y:100,
+    x:1+23,
+    
+    width:45,
+    height:45,
+    y:325,
     angleArr:[],
     lineArr:[],
     numFrame:0,
 };
 var arrFrame=[];
+var butNewFrame={
+  x:Frame.x+Frame.width/2,
+  y:Frame.y-Frame.height/2,
+  width: Frame.width,
+  height: Frame.height,
+};
 window.addEventListener('load', function () {
     preload();
     create();
@@ -72,7 +81,7 @@ function preload()
 }
 function addPointData(x,y)// добавить точку скелета
 {
-    var point=clone(Point);
+    var point=JSON.parse(JSON.stringify(Point));
     point.x=x;
     point.y=y;
     dataLine.pointArr.push(point);
@@ -85,19 +94,25 @@ function create()
     //setOffsetMousePosXY((window.innerWidth - canvas.width)/2,
     //                        (window.innerHeight - canvas.height)/2);
 //    setOffsetMousePosXY(canvas.x,canvas.y);
-    updateLineHuman(0.5);
+    updateLineHuman(x,y,0.5);
     addFrame(dataLine.angleArr);
 }
 function addFrame(angleArr)
 {
-    let frame=clone(Frame);
+    let frame=JSON.parse(JSON.stringify(Frame));
     for (let i=0;i<angleArr.length;i++)
     {
         frame.angleArr.push(angleArr[i]);
     }
+    let arrLine=calcArrLine(frame.x+maxNumFrame*frame.width,frame.y,0.5);
+    for (let i=0;i<arrLine.length;i++)
+    {
+        frame.lineArr.push(arrLine[i]);
+    }
     frame.numFrame=maxNumFrame;
     maxNumFrame++;
     arrFrame.push(frame); 
+    console.log(angleArr);
 }
 function setOffsetMousePosXY(x,y)// устонавить смешения координаат для прицелевания так как экран начинается не в 0 0
 {
@@ -106,20 +121,20 @@ function setOffsetMousePosXY(x,y)// устонавить смешения коо
 }
 function calcLineInHuman(x,y,angle,length)// добавить линию 
 {
-    var line=clone(Line);
+    var line=JSON.parse(JSON.stringify(Line));//clone(Line);
     
     line.angle=angle;
     line.length=length;
-    line.x=x;
-    line.y=y;
-    line.x1=Math.cos(pi*(line.angle)/180)*line.length+line.x;
-    line.y1=Math.sin(pi*(line.angle)/180)*line.length+line.y;
+    line.x=Math.floor(x);
+    line.y=Math.floor(y);
+    line.x1=Math.floor(Math.cos(pi*(line.angle)/180)*line.length+line.x);
+    line.y1=Math.floor(Math.sin(pi*(line.angle)/180)*line.length+line.y);
     //addPointData(line.x1,line.y1);
     return line;
     //arrHumanLine.push(line);
     
 }
-function updateLineHuman(scale=1)// обновить линии скелета
+function updateLineHuman(x,y,scale=1)// обновить линии скелета
 {
     while (dataLine.pointArr.length>0)
     {
@@ -130,14 +145,14 @@ function updateLineHuman(scale=1)// обновить линии скелета
         arrHumanLine.splice(0,1);
     }
     addPointData(x,y);
-    let arrLine=calcArrLine(scale);
+    let arrLine=calcArrLine(x,y,scale);
     for (let i=0;i<arrLine.length;i++)
     {
         arrHumanLine.push(arrLine[i]);
         addPointData(arrLine[i].x1,arrLine[i].y1);
     }
 }
-function calcArrLine(scale=1)
+function calcArrLine(x,y,scale=1)
 {
     let arrLine=[];
     arrLine.push(calcLineInHuman(x,y,dataLine.angleArr[0],
@@ -228,16 +243,46 @@ function drawAll()
     context.moveTo(1,canvas.height/2);
     context.lineTo(canvas.width,canvas.height/2 );
     context.stroke();
+    for (let i=0;i<arrFrame.length;i++)
+    {
+        drawFrame(i);
+    }
+    drawButNewFrame()
 }
-function drawFrame()
+function drawFrame(n=0)
 {
+    context.strokeStyle='rgb(0,0,250)';
+    for (let i=0;i<arrFrame[n].lineArr.length;i++)
+    {
+        context.beginPath();
+        context.moveTo(arrFrame[n].lineArr[i].x,arrFrame[n].lineArr[i].y);
+        context.lineTo(arrFrame[n].lineArr[i].x1,arrFrame[n].lineArr[i].y1);
+        context.stroke();
+        context.strokeRect(arrFrame[n].x-arrFrame[n].width/2,
+                    arrFrame[n].y-arrFrame[n].height/2,45,45);
+    }
     
+}
+function drawButNewFrame()
+{
+    context.strokeStyle='rgb(0,0,255)';
+    context.strokeRect(butNewFrame.x,butNewFrame.y,
+                    butNewFrame.width,butNewFrame.height);
+    context.fillStyle='rgb(255,128,0)';
+    let sizePlus=5;
+    context.fillRect(butNewFrame.x+butNewFrame.width/2-sizePlus,
+                     butNewFrame.y+butNewFrame.height/2-sizePlus*3,
+                     sizePlus*2,sizePlus*6);
+    context.fillRect(butNewFrame.x+butNewFrame.width/2-sizePlus*3,
+                     butNewFrame.y+butNewFrame.height/2-sizePlus,
+                     sizePlus*6,sizePlus*2);
+
 }
 function update()
 {
     let mX=Math.trunc(mouseX-mouseOffsetX);
     let mY=Math.trunc(mouseY-mouseOffsetY);
-    updateLineHuman(0.5);
+    updateLineHuman(x,y,1);
     if (checkMouseLeft())// если нажата левая кнопка мыши
     {
         for (let i=0;i<dataLine.pointArr.length;i++)
@@ -295,6 +340,15 @@ function update()
             oldAngle=angle;
         }
         arrHumanLine[numLineSelect].select=true;
+    }
+    if (mouseLeftClick()==true)
+    {
+        if (mX>butNewFrame.x && mX<butNewFrame.x+butNewFrame.width &&
+            mY>butNewFrame.y && mY<butNewFrame.y+butNewFrame.height )
+        {
+            addFrame(dataLine.angleArr);
+            butNewFrame.x+=butNewFrame.width;
+        }
     }
 }
 function updateAngle(n,angle,oldAngle)// функция которая обновляет углы скелета по номеру
