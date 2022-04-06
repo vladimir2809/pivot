@@ -306,7 +306,7 @@ function drawFrame(n=0,color)// нарисовать кадр
     context.fillText("x:"+frameArr[n].xHuman,frameArr[n].x+2,
                 frameArr[n].y+frameArr[n].height+12);
     context.fillStyle='rgb(0,0,255)';
-    context.fillText("y:"+frameArr[n].xHuman,frameArr[n].x+2,
+    context.fillText("y:"+frameArr[n].yHuman,frameArr[n].x+2,
                 frameArr[n].y+frameArr[n].height+12+15);
     
 }
