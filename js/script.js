@@ -107,14 +107,9 @@ function create()
     updateLineHuman(x,y,0.5);
     addFrame(dataLine.angleArr);
 }
-function addFrame(angleArr,xH=-1,yH=-1)//добавить кадр
+function addFrame(angleArr)//добавить кадр
 {
     let frame=JSON.parse(JSON.stringify(Frame));
-    if (xH!=-1 && yH!=-1)
-    {
-        frame.xHuman=xH;
-        frame.xHuman=yH;
-    }
     for (let i=0;i<angleArr.length;i++)// дабавляем углы в кадр
     {
         frame.angleArr.push(angleArr[i]);
