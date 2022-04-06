@@ -12,6 +12,7 @@ var flagDragHuman=false;
 var maxNumFrame=0;
 var selectFrame=0;
 var scaleFrameHuman=0.4;
+var time=0;
 var Line={
     x:null,
     y:null,
@@ -56,7 +57,7 @@ dataLine={
 var arrHumanLine=[
 ];
 var Frame={
-    x:1+28,
+    x:0,//1+28,
     
     width:50,
     height:50,
@@ -67,10 +68,17 @@ var Frame={
 };
 var frameArr=[];
 var butNewFrame={
-  x:Frame.x+Frame.width/2,
+  x:Frame.x+Frame.width,
   y:Frame.y-Frame.height/2,
   width: Frame.width,
   height: Frame.height,
+};
+butDelFrame={
+   x:1,//Frame.x+Frame.width/2,
+   y:Frame.y-Frame.height/2+100,
+   width:150,
+   height:40,
+   text:"Delete frame",
 };
 window.addEventListener('load', function () {
     preload();
@@ -99,15 +107,20 @@ function create()
     updateLineHuman(x,y,0.5);
     addFrame(dataLine.angleArr);
 }
-function addFrame(angleArr)//добавить кадр
+function addFrame(angleArr,xH=-1,yH=-1)//добавить кадр
 {
     let frame=JSON.parse(JSON.stringify(Frame));
+    if (xH!=-1 && yH!=-1)
+    {
+        frame.xHuman=xH;
+        frame.xHuman=yH;
+    }
     for (let i=0;i<angleArr.length;i++)// дабавляем углы в кадр
     {
         frame.angleArr.push(angleArr[i]);
     }
     // раситыаем линии скедета в кадре
-    let arrLine=calcArrLine(frame.x+maxNumFrame*frame.width,frame.y,
+    let arrLine=calcArrLine(frame.x+maxNumFrame*(frame.width)+frame.width/2,frame.y,
                             frame.angleArr,
                             scaleFrameHuman);
     // созраняет линии скелета в кадре
@@ -115,9 +128,9 @@ function addFrame(angleArr)//добавить кадр
     {
         frame.lineArr.push(arrLine[i]);
     }
-    frame.numFrame=maxNumFrame;
+  //  frame.numFrame=maxNumFrame;
     frame.x+=maxNumFrame*frame.width;
-    frame.x=frame.x-frame.width/2;
+   // frame.x=frame.x-frame.width/2;
     frame.y=frame.y-frame.height/2;
     maxNumFrame++;
     frameArr.push(frame); 
@@ -266,6 +279,7 @@ function drawAll()
         drawFrame(i,color);
     }
     drawButNewFrame();//рисуем кнопку нового кадра
+    drawButDel();
 }
 function drawFrame(n=0,color)// нарисовать кадр
 {
@@ -287,17 +301,38 @@ function drawFrame(n=0,color)// нарисовать кадр
 function drawButNewFrame()// нарисовать кнопку нового кадра
 {
     context.strokeStyle='rgb(0,0,255)';
-    context.strokeRect(butNewFrame.x,butNewFrame.y,
-                    butNewFrame.width,butNewFrame.height);
+    let x=butNewFrame.x;
+    let y=butNewFrame.y;
+    context.strokeRect(x,y,butNewFrame.width,butNewFrame.height);
     context.fillStyle='rgb(255,128,0)';
     let sizePlus=5;
-    context.fillRect(butNewFrame.x+butNewFrame.width/2-sizePlus,
-                     butNewFrame.y+butNewFrame.height/2-sizePlus*3,
+    context.fillRect(x+butNewFrame.width/2-sizePlus,
+                     y+butNewFrame.height/2-sizePlus*3,
                      sizePlus*2,sizePlus*6);
-    context.fillRect(butNewFrame.x+butNewFrame.width/2-sizePlus*3,
-                     butNewFrame.y+butNewFrame.height/2-sizePlus,
+    context.fillRect(x+butNewFrame.width/2-sizePlus*3,
+                     y+butNewFrame.height/2-sizePlus,
                      sizePlus*6,sizePlus*2);
 
+}
+function drawButDel()
+{
+    context.strokeStyle='rgb(0,0,255)';
+    context.fillStyle='rgb(255,128,0)';
+    context.strokeRect(butDelFrame.x,butDelFrame.y,
+                    butDelFrame.width,butDelFrame.height);
+    let heightText=22;
+   // context.beginPath();
+    context.font = heightText+'px Arial';
+    let metrics = context.measureText(butDelFrame.text);
+    let text=butDelFrame.text;
+    let x=butDelFrame.x;
+    let y=butDelFrame.y;
+    let width=butDelFrame.width;
+//    context.strokeRect(this.widthTab*i,this.y,this.widthTab,20);
+    context.fillText(text,x+width/2-metrics.width/2,y+26);
+    context.closePath()
+                    
+                    
 }
 function update()
 {
@@ -353,11 +388,9 @@ function update()
                 
                 updateAngle(numLineSelect,angle,oldAngle);// обновляем углы
                 // присваеваем углы скелета в кадр
-                for (let j=0;j<frameArr[selectFrame].angleArr.length;j++)
-                {
-                    frameArr[selectFrame].angleArr[j]=dataLine.angleArr[j];
+                arrElemCopy(frameArr[selectFrame].angleArr,dataLine.angleArr);
                   
-                } 
+                
                 // раситываем линии келета в кадре
                 frameArr[selectFrame].lineArr=calcArrLine(
                             frameArr[selectFrame].x+frameArr[selectFrame].width/2,
@@ -387,29 +420,62 @@ function update()
         // цикл по обходу кадров
         for (let i=0;i<frameArr.length;i++)
         {
-            //если кликнули н аконкретый кадр
+            //если кликнули на конкретый кадр
             if (mX>frameArr[i].x && mX<frameArr[i].x+frameArr[i].width &&
                     mY>frameArr[i].y && mY<frameArr[i].y+frameArr[i].height)
             {
-                for (let j=0;j<frameArr[i].angleArr.length;j++)// присваем большому скелету линии маленького из кадра
-                {
-                    dataLine.angleArr[j]=frameArr[i].angleArr[j];
-                }
+             
+                arrElemCopy(dataLine.angleArr,frameArr[i].angleArr);
+             
                 selectFrame=i;
               
             }
         }
         console.log(dataLine.angleArr);
-        
+        //если кликнули на кнопку удалить кадр
+        if (mX>butDelFrame.x && mX<butDelFrame.x+butDelFrame.width &&
+            mY>butDelFrame.y && mY<butDelFrame.y+butDelFrame.height )
+        {
+            if (frameArr.length>1)
+            {
+                deleteElemArrToNum(frameArr,selectFrame);
+                maxNumFrame--;
+               if (selectFrame!=0) selectFrame--;
+                butNewFrame.x-=butNewFrame.width;
+                for (let i=0;i<frameArr.length;i++)
+                {
+                    frameArr[i].x=i*frameArr[i].width;
+                    frameArr[i].lineArr=calcArrLine(
+                            frameArr[i].x+frameArr[i].width/2,
+                            frameArr[i].y+frameArr[i].width/2,
+                            frameArr[i].angleArr,
+                            scaleFrameHuman);
+                }
+            }
+        }
     }
+   
+ 
+    
     if ( checkPressKey("Space"))
     {
+        
         selectFrame++;
         selectFrame %= maxNumFrame;
-        for (let j=0;j<frameArr[selectFrame].angleArr.length;j++)// присваем большому скелету линии маленького из кадра
+        arrElemCopy(dataLine.angleArr,frameArr[selectFrame].angleArr)
+        let time2=new Date().getTime();
+        do 
         {
-            dataLine.angleArr[j]=frameArr[selectFrame].angleArr[j];
-        }
+            time2=new Date().getTime();
+        }while (time2-time<33);
+        time=new Date().getTime();
+    }
+}
+function arrElemCopy(arr1,arr2)
+{
+    for (let i=0;i<arr2.length;i++)// присваем большому скелету линии маленького из кадра
+    {
+        arr1[i]=arr2[i];
     }
 }
 function updateAngle(n,angle,oldAngle)// функция которая обновляет углы скелета по номеру

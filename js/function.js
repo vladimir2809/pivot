@@ -29,6 +29,16 @@ function deleteElemArrToNum(array,num)// удалить обьект из мас
     if (index > -1) 
     {
       array.splice(index, 1);
+     // array[num]=array[num+1]; 
+//      for (let i=num;i<array.length;i++)
+//      {
+//        if (i+1<array.length)
+//        {
+//            array[i]=JSON.parse(JSON.stringify(array[i+1])); 
+//        }
+//      }
+//       array.splice(array.length-1, 1);
+//       console.log(array);
     }
 }
 function checkElemArr(array,elem)// прверить есть ли элемент в массиве
