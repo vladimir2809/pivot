@@ -62,6 +62,8 @@ var Frame={
     width:50,
     height:50,
     y:327,
+    xHuman:null,
+    yHuman:null,
     angleArr:[],
     lineArr:[],
     selectFrame:0,
@@ -105,11 +107,16 @@ function create()
     //                        (window.innerHeight - canvas.height)/2);
 //    setOffsetMousePosXY(canvas.x,canvas.y);
     updateLineHuman(x,y,0.5);
-    addFrame(dataLine.angleArr);
+    addFrame(dataLine.angleArr,x,y);
 }
-function addFrame(angleArr)//добавить кадр
+function addFrame(angleArr,xH=-1,yH=-1)//добавить кадр
 {
     let frame=JSON.parse(JSON.stringify(Frame));
+    if (xH!=-1 && yH!=-1)
+    {
+        frame.xHuman=xH;
+        frame.yHuman=yH;
+    }
     for (let i=0;i<angleArr.length;i++)// дабавляем углы в кадр
     {
         frame.angleArr.push(angleArr[i]);
@@ -287,10 +294,20 @@ function drawFrame(n=0,color)// нарисовать кадр
         context.lineTo(frameArr[n].lineArr[i].x1,frameArr[n].lineArr[i].y1);
         context.stroke();
         
-        context.strokeStyle=color;;
-        context.strokeRect(frameArr[n].x,frameArr[n].y,
-                    frameArr[n].width-1,frameArr[n].height-1);
+        
     }
+    context.strokeStyle=color;;
+    context.strokeRect(frameArr[n].x,frameArr[n].y,
+                    frameArr[n].width-1,frameArr[n].height-1);
+    let heightText=12;
+   // context.beginPath();
+    context.font = heightText+'px Arial';
+    context.fillStyle='rgb(255,0,0)';
+    context.fillText("x:"+frameArr[n].xHuman,frameArr[n].x+2,
+                frameArr[n].y+frameArr[n].height+12);
+    context.fillStyle='rgb(0,0,255)';
+    context.fillText("y:"+frameArr[n].xHuman,frameArr[n].x+2,
+                frameArr[n].y+frameArr[n].height+12+15);
     
 }
 function drawButNewFrame()// нарисовать кнопку нового кадра
@@ -333,7 +350,11 @@ function update()
 {
     let mX=Math.trunc(mouseX-mouseOffsetX);
     let mY=Math.trunc(mouseY-mouseOffsetY);
-    updateLineHuman(x,y,1);
+    let xx=frameArr[selectFrame].xHuman==null?x:frameArr[selectFrame].xHuman;
+    let yy=frameArr[selectFrame].yHuman==null?x:frameArr[selectFrame].yHuman;
+    xx=flagDragHuman==true?x:xx;
+    yy=flagDragHuman==true?y:yy;
+    updateLineHuman(xx,yy,1);
     if (checkMouseLeft())// если нажата левая кнопка мыши
     {
         for (let i=0;i<dataLine.pointArr.length;i++)
@@ -369,8 +390,9 @@ function update()
     }  
     if (flagDragHuman==true)
     {
-        x=mX;
-        y=mY;
+        frameArr[selectFrame].xHuman=x=mX;
+        frameArr[selectFrame].yHuman=y=mY;
+        
     }
     if (numLineSelect!=null)// если выбран сустав
     {
@@ -408,7 +430,7 @@ function update()
         if (mX>butNewFrame.x && mX<butNewFrame.x+butNewFrame.width &&
             mY>butNewFrame.y && mY<butNewFrame.y+butNewFrame.height )
         {
-            addFrame(frameArr[maxNumFrame-1].angleArr);
+            addFrame(frameArr[maxNumFrame-1].angleArr,x,y);
             butNewFrame.x+=butNewFrame.width;
             //selectFrame=maxNumFrame;
         }
