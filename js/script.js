@@ -11,8 +11,10 @@ var flagAngle=false;
 var flagDragHuman=false;
 var maxNumFrame=0;
 var selectFrame=0;
+var showFilm=false;
 var scaleFrameHuman=0.4;
 var time=0;
+var delayFrame=22;
 var Line={
     x:null,
     y:null,
@@ -80,13 +82,27 @@ butDelFrame={
    y:Frame.y-Frame.height/2+100,
    width:150,
    height:40,
+   fontSize:20,
    text:"Delete frame",
+};
+butShowFilm={
+   x:160,//Frame.x+Frame.width/2,
+   y:Frame.y-Frame.height/2+100,
+   width:150,
+   height:40,
+   fontSize:20,
+   text:'start',
 };
 window.addEventListener('load', function () {
     preload();
     create();
     setInterval(drawAll,16);
     setInterval(update,16); 
+    var inputDelayFrame = document.getElementById('delayFrame');
+    delayFrame= inputDelayFrame.value;
+    inputDelayFrame.oninput = function() {
+         delayFrame = inputDelayFrame.value;
+    };
 });
 function preload()
 {
@@ -281,7 +297,10 @@ function drawAll()
         drawFrame(i,color);
     }
     drawButNewFrame();//рисуем кнопку нового кадра
-    drawButDel();
+    drawButton(butDelFrame);
+    drawButton(butShowFilm);
+   // drawButDel();
+  //  drawButShowFilm();
 }
 function drawFrame(n=0,color)// нарисовать кадр
 {
@@ -310,6 +329,7 @@ function drawFrame(n=0,color)// нарисовать кадр
                 frameArr[n].y+frameArr[n].height+12+15);
     
 }
+
 function drawButNewFrame()// нарисовать кнопку нового кадра
 {
     context.strokeStyle='rgb(0,0,255)';
@@ -326,26 +346,26 @@ function drawButNewFrame()// нарисовать кнопку нового ка
                      sizePlus*6,sizePlus*2);
 
 }
-function drawButDel()
+function drawButton(obj)
 {
     context.strokeStyle='rgb(0,0,255)';
     context.fillStyle='rgb(255,128,0)';
-    context.strokeRect(butDelFrame.x,butDelFrame.y,
-                    butDelFrame.width,butDelFrame.height);
-    let heightText=22;
-   // context.beginPath();
+    context.strokeRect(obj.x,obj.y,obj.width,obj.height);
+    let heightText=obj.fontSize;
+    context.beginPath();
     context.font = heightText+'px Arial';
-    let metrics = context.measureText(butDelFrame.text);
-    let text=butDelFrame.text;
-    let x=butDelFrame.x;
-    let y=butDelFrame.y;
-    let width=butDelFrame.width;
-//    context.strokeRect(this.widthTab*i,this.y,this.widthTab,20);
+    let text=obj.text;
+    let metrics = context.measureText(text);
+    
+    let x=obj.x;
+    let y=obj.y;
+    let width=obj.width;
+    //    context.strokeRect(this.widthTab*i,this.y,this.widthTab,20);
     context.fillText(text,x+width/2-metrics.width/2,y+26);
     context.closePath()
-                    
-                    
+                      
 }
+
 function update()
 {
     let mX=Math.trunc(mouseX-mouseOffsetX);
@@ -427,8 +447,7 @@ function update()
     if (mouseLeftClick()==true)// если кликнули мышью
     {
         //если кликнули на кнопку нового кадра
-        if (mX>butNewFrame.x && mX<butNewFrame.x+butNewFrame.width &&
-            mY>butNewFrame.y && mY<butNewFrame.y+butNewFrame.height )
+        if (checkInObj(butNewFrame,mX,mY) && showFilm==false)
         {
             addFrame(frameArr[maxNumFrame-1].angleArr,x,y);
             butNewFrame.x+=butNewFrame.width;
@@ -438,8 +457,7 @@ function update()
         for (let i=0;i<frameArr.length;i++)
         {
             //если кликнули на конкретый кадр
-            if (mX>frameArr[i].x && mX<frameArr[i].x+frameArr[i].width &&
-                    mY>frameArr[i].y && mY<frameArr[i].y+frameArr[i].height)
+             if (checkInObj(frameArr[i],mX,mY))
             {
              
                 arrElemCopy(dataLine.angleArr,frameArr[i].angleArr);
@@ -450,8 +468,7 @@ function update()
         }
         console.log(dataLine.angleArr);
         //если кликнули на кнопку удалить кадр
-        if (mX>butDelFrame.x && mX<butDelFrame.x+butDelFrame.width &&
-            mY>butDelFrame.y && mY<butDelFrame.y+butDelFrame.height )
+        if (checkInObj(butDelFrame,mX,mY) && showFilm==false)
         {
             if (frameArr.length>1)
             {
@@ -470,31 +487,37 @@ function update()
                 }
             }
         }
+        if (checkInObj(butShowFilm,mX,mY) && frameArr.length>1)
+        {
+            showFilm=!showFilm;
+            butShowFilm.text=showFilm==true?'Stop':'Start';
+        }
+        
     }
    
  
     
-    if ( checkPressKey("Space"))
+    if ( showFilm==true || checkPressKey("Space"))
     {
         
-        selectFrame++;
-        selectFrame %= maxNumFrame;
-        arrElemCopy(dataLine.angleArr,frameArr[selectFrame].angleArr)
+        
         let time2=new Date().getTime();
-        do 
-        {
-            time2=new Date().getTime();
-        }while (time2-time<33);
-        time=new Date().getTime();
+         
+        
+         time2=new Date().getTime();
+         if (time2-time> delayFrame )
+         {
+            selectFrame++;
+            selectFrame %= maxNumFrame;
+            time=new Date().getTime();
+         };
+        
+        arrElemCopy(dataLine.angleArr,frameArr[selectFrame].angleArr);
+       
+        
     }
 }
-function arrElemCopy(arr1,arr2)
-{
-    for (let i=0;i<arr2.length;i++)// присваем большому скелету линии маленького из кадра
-    {
-        arr1[i]=arr2[i];
-    }
-}
+
 function updateAngle(n,angle,oldAngle)// функция которая обновляет углы скелета по номеру
 {
     switch (n)

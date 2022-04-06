@@ -15,6 +15,13 @@ function clone(obj) {
     }
     return copy;
 }
+function arrElemCopy(arr1,arr2)
+{
+    for (let i=0;i<arr2.length;i++)
+    {
+        arr1[i]=arr2[i];
+    }
+}
 function deleteElemArr(array,elem)// удалить обьект из массива по значению
 {
     var index = array.indexOf(elem);
@@ -47,6 +54,15 @@ function checkElemArr(array,elem)// прверить есть ли элемен�
     if (index > -1) 
     {
      return true;
+    }
+    return false;
+}
+function checkInObj(obj,x,y)
+{
+    if (x>obj.x && x<obj.x+obj.width &&
+            y>obj.y && y<obj.y+obj.height )
+    {
+        return true;
     }
     return false;
 }
