@@ -561,7 +561,8 @@ function update()
                                                 frameArr[i].y+frameArr[i].width/2,
                                         frameArr[i].angleArr, scaleFrameHuman);
                //frameArr[i].y=i*frameArr[i].heigth;
-               console.log('IFIF');
+               arrElemCopy(dataLine.angleArr,frameArr[i].angleArr);
+               //console.log('IFIF');
                bufferDragCopy=null;
                break;
             }  
