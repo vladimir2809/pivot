@@ -4,10 +4,10 @@
 */
 #formText{
     position: absolute;
-    top:1px;
+    top:10px;
     left:1px;
-    width:100px;
-    height:200px;
+    width:60px;
+    height:50px;
     display:block;    
     margin-left: 4px;
     border:1px black solid; 
@@ -18,7 +18,7 @@
    margin-bottom: 2px;
 }
 #formText input.text{
-    width:80px;
+    width:40px;
     
 }
 #range{

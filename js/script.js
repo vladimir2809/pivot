@@ -77,21 +77,23 @@ var butNewFrame={
   y:Frame.y-Frame.height/2,
   width: Frame.width,
   height: Frame.height,
+  text:'+',
+  fontSize:70,
 };
 butDelFrame={
    x:1,//Frame.x+Frame.width/2,
    y:Frame.y-Frame.height/2+100,
    width:150,
    height:40,
-   fontSize:20,
+   fontSize:24,
    text:"Delete frame",
 };
 butShowFilm={
    x:160,//Frame.x+Frame.width/2,
    y:Frame.y-Frame.height/2+100,
-   width:150,
+   width:90,
    height:40,
-   fontSize:20,
+   fontSize:24,
    text:'start',
 };
 window.addEventListener('load', function () {
@@ -99,10 +101,10 @@ window.addEventListener('load', function () {
     create();
     setInterval(drawAll,16);
     setInterval(update,16); 
-    var inputDelayFrame = document.getElementById('delayFrame');
-    delayFrame= inputDelayFrame.value;
-    inputDelayFrame.oninput = function() {
-         delayFrame = inputDelayFrame.value;
+    var inputSpeedFrame = document.getElementById('delayFrame');
+    delayFrame= 1000/inputSpeedFrame.value;
+    inputSpeedFrame.oninput = function() {
+         delayFrame = 1000/inputSpeedFrame.value;
     };
 });
 function preload()
@@ -313,9 +315,17 @@ function drawAll()
 
         }
     }
-    drawButNewFrame();//рисуем кнопку нового кадра
+   // drawButNewFrame();
+   drawButton(butNewFrame);//рисуем кнопку нового кадра
     drawButton(butDelFrame);
     drawButton(butShowFilm);
+     context.beginPath();
+    context.font = 18+'px Arial';
+   
+    //    context.strokeRect(this.widthTab*i,this.y,this.widthTab,20);
+    context.fillText('Для копирования кадра зажми CTRL и перетащи.',
+                3,500);
+    context.closePath()
    // drawButDel();
   //  drawButShowFilm();
 }
@@ -347,22 +357,6 @@ function drawFrame(n=0,color)// нарисовать кадр
     
 }
 
-function drawButNewFrame()// нарисовать кнопку нового кадра
-{
-    context.strokeStyle='rgb(0,0,255)';
-    let x=butNewFrame.x;
-    let y=butNewFrame.y;
-    context.strokeRect(x,y,butNewFrame.width,butNewFrame.height);
-    context.fillStyle='rgb(255,128,0)';
-    let sizePlus=5;
-    context.fillRect(x+butNewFrame.width/2-sizePlus,
-                     y+butNewFrame.height/2-sizePlus*3,
-                     sizePlus*2,sizePlus*6);
-    context.fillRect(x+butNewFrame.width/2-sizePlus*3,
-                     y+butNewFrame.height/2-sizePlus,
-                     sizePlus*6,sizePlus*2);
-
-}
 function drawButton(obj)
 {
     context.strokeStyle='rgb(0,0,255)';
@@ -370,7 +364,7 @@ function drawButton(obj)
     context.strokeRect(obj.x,obj.y,obj.width,obj.height);
     let heightText=obj.fontSize;
     context.beginPath();
-    context.font = heightText+'px Arial';
+    context.font = obj.fontSize+'px Arial';
     let text=obj.text;
     let metrics = context.measureText(text);
     
@@ -378,7 +372,7 @@ function drawButton(obj)
     let y=obj.y;
     let width=obj.width;
     //    context.strokeRect(this.widthTab*i,this.y,this.widthTab,20);
-    context.fillText(text,x+width/2-metrics.width/2,y+26);
+    context.fillText(text,x+width/2-metrics.width/2,y+obj.height/2+obj.fontSize/3);
     context.closePath()
                       
 }
@@ -464,49 +458,54 @@ function update()
     if (mouseLeftClick()==true)// если кликнули мышью
     {
         //если кликнули на кнопку нового кадра
-        if (checkInObj(butNewFrame,mX,mY) && showFilm==false)
+        if ( showFilm==false)
         {
-            addFrame(frameArr[maxNumFrame-1].angleArr,
-                     frameArr[maxNumFrame-1].xHuman,frameArr[maxNumFrame-1].yHuman);
-            butNewFrame.x+=butNewFrame.width;
-            //selectFrame=maxNumFrame;
-        }
-        // цикл по обходу кадров
-        for (let i=0;i<frameArr.length;i++)
-        {
-            //если кликнули на конкретый кадр
-             if (checkInObj(frameArr[i],mX,mY))
+            if (checkInObj(butNewFrame,mX,mY) )
             {
-             
-                arrElemCopy(dataLine.angleArr,frameArr[i].angleArr);
-             
-                selectFrame=i;
-              
+                addFrame(frameArr[maxNumFrame-1].angleArr,
+                         frameArr[maxNumFrame-1].xHuman,
+                         frameArr[maxNumFrame-1].yHuman);
+                butNewFrame.x+=butNewFrame.width;
+                //selectFrame=maxNumFrame;
             }
-        }
-     //   console.log(dataLine.angleArr);
-       // //если кликнули на кнопку удалить кадр
-        if (checkInObj(butDelFrame,mX,mY) && showFilm==false)
-        {
-            if (frameArr.length>1)
+
+            // цикл по обходу кадров
+            for (let i=0;i<frameArr.length;i++)
             {
-                //frameArr[selectFrame-1].xHuman=frameArr[selectFrame].xHuman;
-                deleteElemArrToNum(frameArr,selectFrame);
-                maxNumFrame--;
-                if (selectFrame!=0) selectFrame--;
-                butNewFrame.x-=butNewFrame.width;
-                for (let i=0;i<frameArr.length;i++)
+                //если кликнули на конкретый кадр
+                 if (checkInObj(frameArr[i],mX,mY) )
                 {
-                    frameArr[i].x=i*frameArr[i].width;
-                    
-                    frameArr[i].lineArr=calcArrLine(
-                            frameArr[i].x+frameArr[i].width/2,
-                            frameArr[i].y+frameArr[i].width/2,
-                            frameArr[i].angleArr,
-                            scaleFrameHuman);
+
+                    arrElemCopy(dataLine.angleArr,frameArr[i].angleArr);
+
+                    selectFrame=i;
+
                 }
-               // arrElemCopy(frameArr[selectFrame].angleArr,dataLine.angleArr);
             }
+    
+          // //если кликнули на кнопку удалить кадр
+           if (checkInObj(butDelFrame,mX,mY))
+           {
+               if (frameArr.length>1)
+               {
+                   //frameArr[selectFrame-1].xHuman=frameArr[selectFrame].xHuman;
+                   deleteElemArrToNum(frameArr,selectFrame);
+                   maxNumFrame--;
+                   if (selectFrame!=0) selectFrame--;
+                   butNewFrame.x-=butNewFrame.width;
+                   for (let i=0;i<frameArr.length;i++)
+                   {
+                       frameArr[i].x=i*frameArr[i].width;
+
+                       frameArr[i].lineArr=calcArrLine(
+                               frameArr[i].x+frameArr[i].width/2,
+                               frameArr[i].y+frameArr[i].width/2,
+                               frameArr[i].angleArr,
+                               scaleFrameHuman);
+                   }
+                  // arrElemCopy(frameArr[selectFrame].angleArr,dataLine.angleArr);
+               }
+           }
         }
         if (checkInObj(butShowFilm,mX,mY) && frameArr.length>1)
         {
@@ -517,7 +516,8 @@ function update()
     }
    
  
-    if (checkPressKey('ControlLeft') && checkMouseLeft() && bufferDragCopy==null)
+    if (checkPressKey('ControlLeft') && checkMouseLeft() &&
+            bufferDragCopy==null && showFilm==false)
     {
            // цикл по обходу кадров
         for (let i=0;i<frameArr.length;i++)
