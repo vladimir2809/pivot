@@ -96,9 +96,68 @@ butShowFilm={
    fontSize:24,
    text:'start',
 };
+butSaveFilm={
+   x:360,//Frame.x+Frame.width/2,
+   y:Frame.y-Frame.height/2+100,
+   width:150,
+   height:40,
+   fontSize:24,
+   text:'Сохранить',
+};
+butLoadFilm={
+   x:360,//Frame.x+Frame.width/2,
+   y:Frame.y-Frame.height/2+100,
+   width:150,
+   height:40,
+   fontSize:24,
+   text:'Загрузить',
+};
 window.addEventListener('load', function () {
     preload();
     create();
+    const file = document.getElementById('your-files');
+    file.addEventListener("change", handleFiles);
+    function handleFiles()
+    {
+        var form=document.getElementById('formFile');
+        
+        var fileOne=file.files[0];
+        //console.log(fileOne);
+        //objMap.loadMap(JSON.parse(localStorage.getItem('gameMap')));
+     //   alert(readFile(file));
+        var reader = new FileReader();
+        reader.readAsText(fileOne);
+        reader.onload = function() {
+            frameArrCopy=JSON.parse(reader.result);
+            while (frameArr.length>=1)
+            {
+                frameArr.splice(frameArr.length-1,1);
+               // maxNumFrame--;
+            }
+            
+            for (let i=0;i<frameArrCopy.length;i++)
+            {
+                addFrame(frameArrCopy[i].angleArr,frameArrCopy[i].xHuman,
+                        frameArrCopy[i].yHuman)
+                butNewFrame.x=frameArr.length*butNewFrame.width;
+            }
+            arrElemCopy(dataLine.angleArr,frameArr[0].angleArr);
+             
+           // maxNumFrame=frameArr.length+1;
+        }
+//        
+//          objMap.loadMap(JSON.parse(reader.result));
+//        // alert(reader.result);
+//        }
+        reader.onerror = function() {
+        
+            alert('ошибка загрузки карты');
+        }
+        //;
+        file.value="";
+        form.style.display='none';
+   //     this.form.reset;
+    }
     setInterval(drawAll,16);
     setInterval(update,16); 
     var inputSpeedFrame = document.getElementById('delayFrame');
@@ -122,10 +181,13 @@ function create()
     canvas = document.getElementById("canvas");
     context = canvas.getContext("2d");
     initKeyboardAndMouse(['ArrowLeft','Space','ArrowRight',
-                            'ArrowUp','ArrowDown', 'ControlLeft']);
+                            'ArrowUp','ArrowDown', 'ControlLeft',"KeyW"
+                            ,"KeyD","KeyS","KeyA"]);
     //setOffsetMousePosXY((window.innerWidth - canvas.width)/2,
     //                        (window.innerHeight - canvas.height)/2);
 //    setOffsetMousePosXY(canvas.x,canvas.y);
+    butSaveFilm.x=canvas.width-330;
+    butLoadFilm.x=canvas.width-160;
     updateLineHuman(x,y,0.5);
     addFrame(dataLine.angleArr,x,y);
 }
@@ -142,7 +204,7 @@ function addFrame(angleArr,xH=-1,yH=-1)//добавить кадр
         frame.angleArr.push(angleArr[i]);
     }
     // раситыаем линии скедета в кадре
-    let arrLine=calcArrLine(frame.x+maxNumFrame*(frame.width)+frame.width/2,frame.y,
+    let arrLine=calcArrLine(frame.x+(frameArr.length)*(frame.width)+frame.width/2,frame.y,
                             frame.angleArr,
                             scaleFrameHuman);
     // созраняет линии скелета в кадре
@@ -151,10 +213,10 @@ function addFrame(angleArr,xH=-1,yH=-1)//добавить кадр
         frame.lineArr.push(arrLine[i]);
     }
   //  frame.numFrame=maxNumFrame;
-    frame.x+=maxNumFrame*frame.width;
+    frame.x+=(frameArr.length)*frame.width;
    // frame.x=frame.x-frame.width/2;
     frame.y=frame.y-frame.height/2;
-    maxNumFrame++;
+  //  maxNumFrame++;
     frameArr.push(frame); 
     console.log(frameArr);
 }
@@ -316,15 +378,22 @@ function drawAll()
         }
     }
    // drawButNewFrame();
-   drawButton(butNewFrame);//рисуем кнопку нового кадра
+    drawButton(butNewFrame);//рисуем кнопку нового кадра
     drawButton(butDelFrame);
-    drawButton(butShowFilm);
+    drawButton(butShowFilm);   
+    drawButton(butSaveFilm);
+    drawButton(butLoadFilm)
      context.beginPath();
     context.font = 18+'px Arial';
    
     //    context.strokeRect(this.widthTab*i,this.y,this.widthTab,20);
+    let y=480;
     context.fillText('Для копирования кадра зажми CTRL и перетащи.',
-                3,500);
+                3,y);
+    context.fillText('Для перемещения на 1px используй WSAD.',
+                3,y+30);
+    context.fillText('Во время просмотра, нельзя: удалять, добавлять, сохранять и загружать.',
+                3,y+60);
     context.closePath()
    // drawButDel();
   //  drawButShowFilm();
@@ -427,8 +496,9 @@ function update()
     }
     if (numLineSelect!=null)// если выбран сустав
     {
-       let angle=angleIm(arrHumanLine[numLineSelect].x,arrHumanLine[numLineSelect].y,
-                                                  mX,mY)-90;
+       let angle=Math.floor(angleIm(arrHumanLine[numLineSelect].x,
+                                    arrHumanLine[numLineSelect].y,
+                                    mX,mY)-90);
         if (oldAngle!=angle)
         {1;
             if (flagAngle==true)// если держим левую кнопку мыши в суставе
@@ -455,6 +525,30 @@ function update()
         }
         arrHumanLine[numLineSelect].select=true;
     }
+    if (keyUpDuration("KeyW",100))
+    {
+        y--;
+        frameArr[selectFrame].yHuman=y;
+       // alert(454);
+    }
+    if (keyUpDuration("KeyD",100))
+    {
+        x++;
+        frameArr[selectFrame].xHuman=x;
+       // alert(454);
+    }
+    if (keyUpDuration("KeyS",100))
+    {
+        y++;
+        frameArr[selectFrame].yHuman=y;
+       // alert(454);
+    }
+    if (keyUpDuration("KeyA",100))
+    {
+        x--;
+        frameArr[selectFrame].xHuman=x;
+       // alert(454);
+    }
     if (mouseLeftClick()==true)// если кликнули мышью
     {
         //если кликнули на кнопку нового кадра
@@ -462,10 +556,11 @@ function update()
         {
             if (checkInObj(butNewFrame,mX,mY) )
             {
-                addFrame(frameArr[maxNumFrame-1].angleArr,
-                         frameArr[maxNumFrame-1].xHuman,
-                         frameArr[maxNumFrame-1].yHuman);
-                butNewFrame.x+=butNewFrame.width;
+                numFrame=(frameArr.length);
+                addFrame(frameArr[numFrame-1].angleArr,
+                         frameArr[numFrame-1].xHuman,
+                         frameArr[numFrame-1].yHuman);
+                butNewFrame.x=frameArr.length*butNewFrame.width;
                 //selectFrame=maxNumFrame;
             }
 
@@ -490,7 +585,7 @@ function update()
                {
                    //frameArr[selectFrame-1].xHuman=frameArr[selectFrame].xHuman;
                    deleteElemArrToNum(frameArr,selectFrame);
-                   maxNumFrame--;
+                  // maxNumFrame--;
                    if (selectFrame!=0) selectFrame--;
                    butNewFrame.x-=butNewFrame.width;
                    for (let i=0;i<frameArr.length;i++)
@@ -505,13 +600,23 @@ function update()
                    }
                   // arrElemCopy(frameArr[selectFrame].angleArr,dataLine.angleArr);
                }
-           }
+            }  
+            if (checkInObj(butSaveFilm,mX,mY))
+            {
+                downloadAsFile(JSON.stringify(frameArr),'saveFilmHuman');
+            }
+            if (checkInObj(butLoadFilm,mX,mY))
+            {
+                var formFile=document.getElementById("formFile");
+                formFile.style.display="block";
+            }
         }
         if (checkInObj(butShowFilm,mX,mY) && frameArr.length>1)
         {
             showFilm=!showFilm;
             butShowFilm.text=showFilm==true?'Stop':'Start';
         }
+     
         
     }
    
@@ -574,7 +679,7 @@ function update()
         bufferDragCopy=null;
     }
   
-    if ( showFilm==true || checkPressKey("Space"))
+    if ( showFilm==true /*|| checkPressKey("Space")*/)
     {
         
         
@@ -585,7 +690,7 @@ function update()
          if (time2-time> delayFrame )
          {
             selectFrame++;
-            selectFrame %= maxNumFrame;
+            selectFrame %= (frameArr.length);
             time=new Date().getTime();
          };
         
@@ -640,6 +745,13 @@ function updateAngle(n,angle,oldAngle)// функция которая обно�
         break;
     }
 }
-
+function downloadAsFile(data,nameFile)
+{
+  let a = document.createElement("a");
+  let file = new Blob([data], {type: 'application/json'});
+  a.href = URL.createObjectURL(file);
+  a.download = nameFile+".txt";
+  a.click();
+}
 
 

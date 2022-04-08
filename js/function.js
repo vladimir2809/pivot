@@ -267,6 +267,8 @@ function downloadAsFile(data)
       a.download = "example.txt";
       a.click();
     }
+    
+
 function getDataGoogleSheets()
 {
     jQuery(document).ready(function() {
