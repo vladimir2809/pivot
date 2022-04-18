@@ -12,7 +12,7 @@ var flagDragHuman=false;
 var maxNumFrame=0;
 var selectFrame=0;
 var showFilm=false;
-var scaleFrameHuman=0.4;
+var scaleFrameHuman=0.24;
 var time=0;
 var delayFrame=22;
 var bufferDragCopy=null;
@@ -29,34 +29,7 @@ Point={
     x:null,
     y:null,
 }
-dataLine={
-    angleArr:[
-        -90,
-        45,
-        135,
-        90,
-        90,
-        45,
-        135,
-        -15,
-        -15,
-        -90
-    ],
-    lengthArr:[
-        30,
-        20,
-        20,
-        20,
-        20,
-        20,
-        20,
-        20,
-        20,
-        10,
-    ],
-    
-    pointArr:[],
-}
+
 var arrHumanLine=[
 ];
 var Frame={
@@ -454,7 +427,7 @@ function update()
     let yy=frameArr[selectFrame].yHuman==null?x:frameArr[selectFrame].yHuman;
     xx=flagDragHuman==true?x:xx;
     yy=flagDragHuman==true?y:yy;
-    updateLineHuman(xx,yy,1);
+    updateLineHuman(xx,yy,0.5);
     if (checkMouseLeft())// если нажата левая кнопка мыши
     {
         for (let i=0;i<dataLine.pointArr.length;i++)
@@ -572,7 +545,8 @@ function update()
                 {
 
                     arrElemCopy(dataLine.angleArr,frameArr[i].angleArr);
-
+                    x=frameArr[i].xHuman;
+                    y=frameArr[i].yHuman;
                     selectFrame=i;
 
                 }
@@ -738,7 +712,7 @@ function updateAngle(n,angle,oldAngle)// функция которая обно�
            dataLine.angleArr[8]+=angle-oldAngle;
         }
         break;
-        case 3:case 4:case 8:case 7:case 9:
+        case 3:case 4:case 7:case 8:case 9:
         {
            dataLine.angleArr[n]=angle; 
         }
