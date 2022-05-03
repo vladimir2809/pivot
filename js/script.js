@@ -62,7 +62,7 @@ butDelFrame={
    text:"Delete frame",
 };
 butShowFilm={
-   x:160,//Frame.x+Frame.width/2,
+   x:320,//Frame.x+Frame.width/2,
    y:Frame.y-Frame.height/2+100,
    width:90,
    height:40,
@@ -84,6 +84,14 @@ butLoadFilm={
    height:40,
    fontSize:24,
    text:'Загрузить',
+};
+butMirrorFrame={
+   x:160,//Frame.x+Frame.width/2,
+   y:Frame.y-Frame.height/2+100,
+   width:150,
+   height:40,
+   fontSize:24,
+   text:'отзеркалить', 
 };
 window.addEventListener('load', function () {
     preload();
@@ -355,7 +363,8 @@ function drawAll()
     drawButton(butDelFrame);
     drawButton(butShowFilm);   
     drawButton(butSaveFilm);
-    drawButton(butLoadFilm)
+    drawButton(butLoadFilm);
+    drawButton(butMirrorFrame);
      context.beginPath();
     context.font = 18+'px Arial';
    
@@ -498,35 +507,39 @@ function update()
         }
         arrHumanLine[numLineSelect].select=true;
     }
-    if (keyUpDuration("KeyW",100))
-    {
-        y--;
-        frameArr[selectFrame].yHuman=y;
-       // alert(454);
-    }
-    if (keyUpDuration("KeyD",100))
-    {
-        x++;
-        frameArr[selectFrame].xHuman=x;
-       // alert(454);
-    }
-    if (keyUpDuration("KeyS",100))
-    {
-        y++;
-        frameArr[selectFrame].yHuman=y;
-       // alert(454);
-    }
-    if (keyUpDuration("KeyA",100))
-    {
-        x--;
-        frameArr[selectFrame].xHuman=x;
-       // alert(454);
+    if ( showFilm==false)
+    {    
+        if (keyUpDuration("KeyW",100))
+        {
+            y--;
+            frameArr[selectFrame].yHuman=y;
+           // alert(454);
+        }
+        if (keyUpDuration("KeyD",100))
+        {
+            x++;
+            frameArr[selectFrame].xHuman=x;
+           // alert(454);
+        }
+        if (keyUpDuration("KeyS",100))
+        {
+            y++;
+            frameArr[selectFrame].yHuman=y;
+           // alert(454);
+        }
+        if (keyUpDuration("KeyA",100))
+        {
+            x--;
+            frameArr[selectFrame].xHuman=x;
+           // alert(454);
+        }
     }
     if (mouseLeftClick()==true)// если кликнули мышью
     {
-        //если кликнули на кнопку нового кадра
+        
         if ( showFilm==false)
         {
+            //если кликнули на кнопку нового кадра
             if (checkInObj(butNewFrame,mX,mY) )
             {
                 numFrame=(frameArr.length);
@@ -583,6 +596,32 @@ function update()
             {
                 var formFile=document.getElementById("formFile");
                 formFile.style.display="block";
+            }
+            if (checkInObj(butMirrorFrame,mX,mY))// если нажата отзеркалить
+            {
+                
+                let buffer=[];
+                for (let i=0;i<arrHumanLine.length;i++)
+                {
+                    let lineOne=JSON.parse(JSON.stringify(Line));;
+                    lineOne.x=-arrHumanLine[i].x;
+                    lineOne.y=arrHumanLine[i].y;
+                    lineOne.x1=-arrHumanLine[i].x1;
+                    lineOne.y1=arrHumanLine[i].y1;
+                    lineOne.angle=Math.floor(angleIm(lineOne.x,lineOne.y,
+                                    lineOne.x1,lineOne.y1)-90);
+                    buffer.push(lineOne);           
+                }
+                for (let i=0;i<buffer.length;i++)
+                {
+                    dataLine.angleArr[i]=buffer[i].angle;
+                }
+                arrElemCopy(frameArr[selectFrame].angleArr,dataLine.angleArr);
+                frameArr[selectFrame].lineArr=calcArrLine(
+                            frameArr[selectFrame].x+frameArr[selectFrame].width/2,
+                            frameArr[selectFrame].y+frameArr[selectFrame].width/2,
+                            frameArr[selectFrame].angleArr,
+                            scaleFrameHuman)
             }
         }
         if (checkInObj(butShowFilm,mX,mY) && frameArr.length>1)
